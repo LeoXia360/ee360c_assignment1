@@ -1,2 +1,2 @@
-# ee360c_assignment1
+# ee360p_assignment1
 parallel sort and parallel search
