@@ -1,4 +1,5 @@
-//UT-EID=
+//UT-EID=LX939
+//RJ8656
 
 
 import java.util.*;
@@ -15,17 +16,39 @@ public class PSearch{
 	  ArrayList<Integer> b = new ArrayList<Integer>();
 	  
 	  int beginning = 0;
-	  int end = numThreads;
-	  for(int i = 0; i < numThreads; i++){
-		  //separates into array into subarrays and creates future for each one
-		  b.add(beginning);
-		  //out of bounds exception
-		  Future<Integer> bigRings = es.submit(new SearchThread(k, Arrays.copyOfRange(A, beginning, end)));
-		  f.add(bigRings);
-		  beginning = end + 1;
-		  //not accounting for the case when array size is not perfectly divisible by numThreads
-		  end = end + numThreads + 1;
+	  int len = A.length / numThreads;
+	  int end = beginning + len;
+	  
+	  //in the case that numThreads is greater than array length we don't use some threads
+	  if(numThreads >= A.length){
+		  end = beginning + 1;
+		 for(int i = 0; i < A.length; i++){
+			 b.add(beginning);
+			 Future<Integer> bigRings = es.submit(new SearchThread(k, Arrays.copyOfRange(A, beginning, end)));
+			 f.add(bigRings);
+			 beginning = beginning + 1;
+			 end = end + 1;
+		 }
+	  }else{
+		  //in the case that numThreads is less than array length
+		  
+		  for(int i = 0; i < numThreads; i++){
+			  //separates into array into subarrays and creates future for each one
+			  b.add(beginning);
+			  //out of bounds exception
+			  Future<Integer> bigRings = es.submit(new SearchThread(k, Arrays.copyOfRange(A, beginning, end)));
+			  f.add(bigRings);
+			  beginning = end + 1;
+			  //not accounting for the case when array size is not perfectly divisible by numThreads
+			  if(i == numThreads-1){
+				  end = A.length-1;
+			  }else{
+				  end = end + len + 1;
+			  }
+		  }
 	  }
+	  
+	  
 	  int count = 0;
 	  for(Future<Integer> lowLife : f){
 		  try {
@@ -43,7 +66,7 @@ public class PSearch{
 		}
 		  count++;
 	  }
-
+	
     return -1; // if not found
     
   }
